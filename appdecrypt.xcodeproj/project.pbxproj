@@ -10,7 +10,6 @@
 		843BAE7A26B2A2190048546B /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843BAE7926B2A2190048546B /* main.swift */; };
 		843BAE8126B2A2500048546B /* ConsoleIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843BAE8026B2A2500048546B /* ConsoleIO.swift */; };
 		843BAE8326B2A26D0048546B /* dump.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843BAE8226B2A26D0048546B /* dump.swift */; };
-		843BAE8726B2A29B0048546B /* CBridage.m in Sources */ = {isa = PBXBuildFile; fileRef = 843BAE8626B2A29B0048546B /* CBridage.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -30,9 +29,6 @@
 		843BAE7926B2A2190048546B /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		843BAE8026B2A2500048546B /* ConsoleIO.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleIO.swift; sourceTree = "<group>"; };
 		843BAE8226B2A26D0048546B /* dump.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = dump.swift; sourceTree = "<group>"; };
-		843BAE8426B2A29B0048546B /* appdecrypt-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "appdecrypt-Bridging-Header.h"; sourceTree = "<group>"; };
-		843BAE8526B2A29B0048546B /* CBridage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CBridage.h; sourceTree = "<group>"; };
-		843BAE8626B2A29B0048546B /* CBridage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CBridage.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,9 +64,6 @@
 				843BAE7926B2A2190048546B /* main.swift */,
 				843BAE8226B2A26D0048546B /* dump.swift */,
 				843BAE8026B2A2500048546B /* ConsoleIO.swift */,
-				843BAE8526B2A29B0048546B /* CBridage.h */,
-				843BAE8626B2A29B0048546B /* CBridage.m */,
-				843BAE8426B2A29B0048546B /* appdecrypt-Bridging-Header.h */,
 			);
 			path = appdecrypt;
 			sourceTree = "<group>";
@@ -135,7 +128,6 @@
 			files = (
 				843BAE7A26B2A2190048546B /* main.swift in Sources */,
 				843BAE8326B2A26D0048546B /* dump.swift in Sources */,
-				843BAE8726B2A29B0048546B /* CBridage.m in Sources */,
 				843BAE8126B2A2500048546B /* ConsoleIO.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -270,7 +262,6 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "appdecrypt/appdecrypt-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
@@ -288,7 +279,6 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_OBJC_BRIDGING_HEADER = "appdecrypt/appdecrypt-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;

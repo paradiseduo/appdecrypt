@@ -8,6 +8,9 @@
 import Foundation
 import MachO
 
+@_silgen_name("mremap_encrypted")
+func mremap_encrypted(_: UnsafeMutableRawPointer, _: Int, _: UInt32, _: UInt32, _: UInt32) -> Int32
+
 class Dump {
     let consoleIO = ConsoleIO()
     func staticMode() {
@@ -88,7 +91,7 @@ class Dump {
         if base == MAP_FAILED {
             return false
         }
-        let error = CBridage.encrypted(base!, cryptsize: Int(info.cryptsize), cryptid: info.cryptid)
+        let error = mremap_encrypted(base!, Int(info.cryptsize), info.cryptid,UInt32(CPU_TYPE_ARM64),UInt32(CPU_SUBTYPE_ARM64_ALL))
         if error != 0 {
             munmap(base!, Int(info.cryptsize))
             return false
