@@ -91,12 +91,12 @@ class Dump {
         if base == MAP_FAILED {
             return false
         }
-        let error = mremap_encrypted(base!, Int(info.cryptsize), info.cryptid,UInt32(CPU_TYPE_ARM64),UInt32(CPU_SUBTYPE_ARM64_ALL))
+        let error = mremap_encrypted(base!, Int(info.cryptsize), info.cryptid, UInt32(CPU_TYPE_ARM64), UInt32(CPU_SUBTYPE_ARM64_ALL))
         if error != 0 {
-            munmap(base!, Int(info.cryptsize))
+            munmap(base, Int(info.cryptsize))
             return false
         }
-        memcpy(dupe+UnsafeMutableRawPointer.Stride(info.cryptoff), base!, Int(info.cryptsize))
+        memcpy(dupe+UnsafeMutableRawPointer.Stride(info.cryptoff), base, Int(info.cryptsize))
         munmap(base, Int(info.cryptsize))
         
         return true
