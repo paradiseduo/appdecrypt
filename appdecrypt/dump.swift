@@ -31,8 +31,6 @@ class Dump {
                 consoleIO.writeMessage("Success to copy file.")
             }catch{
                 consoleIO.writeMessage("Failed to copy file.", to: .error)
-                NotificationCenter.default.post(name: NSNotification.Name("stop"), object: nil)
-                return
             }
         }
         
@@ -66,7 +64,9 @@ class Dump {
                             munmap(base, base_size)
                             munmap(dupe, dupe_size)
                             consoleIO.writeMessage("Dump Success")
-                            NotificationCenter.default.post(name: NSNotification.Name("stop"), object: nil)
+                            DispatchQueue.main.async {
+                                NotificationCenter.default.post(name: NSNotification.Name("stop"), object: nil)
+                            }
                         } else {
                             munmap(base, base_size)
                             munmap(dupe, dupe_size)
