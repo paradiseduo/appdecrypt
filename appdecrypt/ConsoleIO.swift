@@ -42,6 +42,8 @@ class ConsoleIO {
         OPTIONS:
           -h, --help              Show help information.
         """)
-        NotificationCenter.default.post(name: NSNotification.Name("stop"), object: nil)
+        DispatchQueue.main.async {
+            NotificationCenter.default.post(name: NSNotification.Name("stop"), object: nil)
+        }
     }
 }
