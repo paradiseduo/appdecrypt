@@ -20,7 +20,9 @@ class ConsoleIO {
                 print("\(message)")
             case .error:
                 fputs("Error: \(message)\n", stderr)
-                NotificationCenter.default.post(name: NSNotification.Name("stop"), object: nil)
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: NSNotification.Name("stop"), object: nil)
+                }
         }
     }
     
