@@ -2,11 +2,17 @@
 
 Decrypt application encrypted binaries on macOS when SIP-enabled.
 
-This works well and compiles for iOS nicely, if you want use it at iOS devices, you can use [ios branch](https://github.com/paradiseduo/appdecrypt/tree/ios). Thanks @dlevi309.
+This works well and compiles for iOS nicely, if you want use it at iOS devices, you can use build-ios.sh (Thanks @dlevi309).
 
 ## How to use
 
 ```bash
+> git clone https://github.com/paradiseduo/appdecrypt.git
+> cd appdecrypt
+> chmod +x build-macOS_arm.sh
+> ./build-macOS_arm.sh
+> cd .build/release
+> ./appdecrypt
 Version 1.0
 
 appdecrypt is a tool to make decrypt application encrypted binaries on macOS when SIP-enabled.
