@@ -2,7 +2,7 @@
 
 Decrypt application encrypted binaries on macOS when SIP-enabled.
 
-This works well and compiles for iOS nicely, if you want use it at iOS devices, you can use ios branch. Thanks @dlevi309.
+This works well and compiles for iOS nicely, if you want use it at iOS devices, you can use [ios branch](https://github.com/paradiseduo/appdecrypt/tree/ios). Thanks @dlevi309.
 
 ## How to use
 
