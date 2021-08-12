@@ -33,13 +33,16 @@ class ConsoleIO {
         appdecrypt is a tool to make decrypt application encrypted binaries on macOS when SIP-enabled.
         
         Examples:
-            appdecrypt /Applicaiton/Test.app/Wrapper/Test.app/Test /Users/admin/Desktop/Test
+            mac:
+                appdecrypt /Applicaiton/Test.app /Users/admin/Desktop/Test.app
+            iPhone:
+                appdecrypt /var/containers/Bundle/Application/XXXXXX /tmp
         
         USAGE: appdecrypt encryptMachO_Path decryptMachO_Path
         
         ARGUMENTS:
-          <encryptMachO_Path>     The encrypt machO file path.
-          <decryptMachO_Path>     The path output decrypt machO file.
+          <encryptApp_Path>     The encrypt app file path.
+          <decrypt_Path>        The path output file.
         
         OPTIONS:
           -h, --help              Show help information.
