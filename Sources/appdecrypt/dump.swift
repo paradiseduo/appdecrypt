@@ -26,8 +26,19 @@ class Dump {
         }
         
         let fileManager = FileManager.default
-        let sourceUrl = CommandLine.arguments[1]
-        let targetUrl = CommandLine.arguments[2]
+        var sourceUrl = CommandLine.arguments[1]
+        if sourceUrl.hasSuffix("/") {
+            sourceUrl.removeLast()
+        }
+        var targetUrl = CommandLine.arguments[2]
+        if targetUrl.hasSuffix("/") {
+            targetUrl.removeLast()
+        }
+        #if os(iOS)
+        if !targetUrl.hasSuffix("/Payload") {
+            targetUrl += "/Payload"
+        }
+        #endif
         if !fileManager.fileExists(atPath: targetUrl) {
             do{
                 try fileManager.copyItem(atPath: sourceUrl, toPath: targetUrl)
@@ -37,51 +48,88 @@ class Dump {
             }
         }
         
-        Dump.mapFile(path: sourceUrl, mutable: false) { base_size, base_descriptor, base_raw in
-            if let base = base_raw {
-                Dump.mapFile(path: targetUrl, mutable: true) { dupe_size, dupe_descriptor, dupe_raw in
-                    if let dupe = dupe_raw {
-                        if base_size == dupe_size {
-                            let header = UnsafeMutableRawPointer(mutating: dupe).assumingMemoryBound(to: mach_header_64.self)
-                            assert(header.pointee.magic == MH_MAGIC_64)
-                            assert(header.pointee.cputype == CPU_TYPE_ARM64)
-                            assert(header.pointee.cpusubtype == CPU_SUBTYPE_ARM64_ALL)
-                            
-                            
-                            guard var curCmd = UnsafeMutablePointer<load_command>(bitPattern: UInt(bitPattern: header)+UInt(MemoryLayout<mach_header_64>.size)) else {
-                                return
-                            }
-                            
-                            var segCmd : UnsafeMutablePointer<load_command>!
-                            for _: UInt32 in 0 ..< header.pointee.ncmds {
-                                segCmd = curCmd
-                                if segCmd.pointee.cmd == LC_ENCRYPTION_INFO_64 {
-                                    let command = UnsafeMutableRawPointer(mutating: segCmd).assumingMemoryBound(to: encryption_info_command_64.self)
-                                    if Dump.dump(descriptor: base_descriptor, dupe: dupe, info: command.pointee) {
-                                        command.pointee.cryptid = 0
-                                    }
-                                    break
+        var needDumpFilePaths = [String]()
+        var dumpedFilePaths = [String]()
+        let enumeratorAtPath = fileManager.enumerator(atPath: sourceUrl)
+        if let arr = enumeratorAtPath?.allObjects as? [String] {
+            for item in arr {
+                if item.hasSuffix(".app") {
+                    let machOName = item.components(separatedBy: "/").last?.components(separatedBy: ".app").first ?? ""
+                    if machOName == "" {
+                        consoleIO.writeMessage("Can't find machO name.", to: .error)
+                        return
+                    }
+                    needDumpFilePaths.append(sourceUrl+"/"+item+"/"+machOName)
+                    dumpedFilePaths.append(targetUrl+"/"+item+"/"+machOName)
+                }
+                if item.hasSuffix(".framework") {
+                    let frameName = item.components(separatedBy: "/").last?.components(separatedBy: ".framework").first ?? ""
+                    if frameName != "" {
+                        needDumpFilePaths.append(sourceUrl+"/"+item+"/"+frameName)
+                        dumpedFilePaths.append(targetUrl+"/"+item+"/"+frameName)
+                    }
+                }
+                if item.hasSuffix(".appex") {
+                    let exName = item.components(separatedBy: "/").last?.components(separatedBy: ".appex").first ?? ""
+                    if exName != "" {
+                        needDumpFilePaths.append(sourceUrl+"/"+item+"/"+exName)
+                        dumpedFilePaths.append(targetUrl+"/"+item+"/"+exName)
+                    }
+                }
+            }
+        } else {
+            consoleIO.writeMessage("File is empty.", to: .error)
+            return
+        }
+        
+        
+        for (i, sourcePath) in needDumpFilePaths.enumerated() {
+            let targetPath = dumpedFilePaths[i]
+            Dump.mapFile(path: sourcePath, mutable: false) { base_size, base_descriptor, base_raw in
+                if let base = base_raw {
+                    Dump.mapFile(path: targetPath, mutable: true) { dupe_size, dupe_descriptor, dupe_raw in
+                        if let dupe = dupe_raw {
+                            if base_size == dupe_size {
+                                let header = UnsafeMutableRawPointer(mutating: dupe).assumingMemoryBound(to: mach_header_64.self)
+                                assert(header.pointee.magic == MH_MAGIC_64)
+                                assert(header.pointee.cputype == CPU_TYPE_ARM64)
+                                assert(header.pointee.cpusubtype == CPU_SUBTYPE_ARM64_ALL)
+                                
+                                guard var curCmd = UnsafeMutablePointer<load_command>(bitPattern: UInt(bitPattern: header)+UInt(MemoryLayout<mach_header_64>.size)) else {
+                                    return
                                 }
-                                curCmd = UnsafeMutableRawPointer(curCmd).advanced(by: Int(curCmd.pointee.cmdsize)).assumingMemoryBound(to: load_command.self)
-                            }
-                            munmap(base, base_size)
-                            munmap(dupe, dupe_size)
-                            consoleIO.writeMessage("Dump Success")
-                            DispatchQueue.main.async {
-                                NotificationCenter.default.post(name: NSNotification.Name("stop"), object: nil)
+                                
+                                var segCmd : UnsafeMutablePointer<load_command>!
+                                for _: UInt32 in 0 ..< header.pointee.ncmds {
+                                    segCmd = curCmd
+                                    if segCmd.pointee.cmd == LC_ENCRYPTION_INFO_64 {
+                                        let command = UnsafeMutableRawPointer(mutating: segCmd).assumingMemoryBound(to: encryption_info_command_64.self)
+                                        if Dump.dump(descriptor: base_descriptor, dupe: dupe, info: command.pointee) {
+                                            command.pointee.cryptid = 0
+                                        }
+                                        break
+                                    }
+                                    curCmd = UnsafeMutableRawPointer(curCmd).advanced(by: Int(curCmd.pointee.cmdsize)).assumingMemoryBound(to: load_command.self)
+                                }
+                                munmap(base, base_size)
+                                munmap(dupe, dupe_size)
+                                consoleIO.writeMessage("Dump \(sourcePath) Success")
+                                DispatchQueue.main.async {
+                                    NotificationCenter.default.post(name: NSNotification.Name("stop"), object: nil)
+                                }
+                            } else {
+                                munmap(base, base_size)
+                                munmap(dupe, dupe_size)
+                                consoleIO.writeMessage("If the files are not of the same size, then they are not duplicates of each other, which is an error.", to: .error)
                             }
                         } else {
                             munmap(base, base_size)
-                            munmap(dupe, dupe_size)
-                            consoleIO.writeMessage("If the files are not of the same size, then they are not duplicates of each other, which is an error.", to: .error)
+                            consoleIO.writeMessage("Read Dupe Fail", to: .error)
                         }
-                    } else {
-                        munmap(base, base_size)
-                        consoleIO.writeMessage("Read Dupe Fail", to: .error)
                     }
+                } else {
+                    consoleIO.writeMessage("Read Base Fail", to: .error)
                 }
-            } else {
-                consoleIO.writeMessage("Read Base Fail", to: .error)
             }
         }
     }
