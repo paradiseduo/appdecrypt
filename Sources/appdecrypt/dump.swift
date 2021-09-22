@@ -104,8 +104,12 @@ class Dump {
                                     segCmd = curCmd
                                     if segCmd.pointee.cmd == LC_ENCRYPTION_INFO_64 {
                                         let command = UnsafeMutableRawPointer(mutating: segCmd).assumingMemoryBound(to: encryption_info_command_64.self)
-                                        if Dump.dump(descriptor: base_descriptor, dupe: dupe, info: command.pointee) {
+                                        let result = Dump.dump(descriptor: base_descriptor, dupe: dupe, info: command.pointee)
+                                        if result.0 {
                                             command.pointee.cryptid = 0
+                                            consoleIO.writeMessage("Dump \(sourcePath) Success")
+                                        } else {
+                                            consoleIO.writeMessage("Dump \(sourcePath) fail, because of \(result.1)")
                                         }
                                         break
                                     }
@@ -113,7 +117,6 @@ class Dump {
                                 }
                                 munmap(base, base_size)
                                 munmap(dupe, dupe_size)
-                                consoleIO.writeMessage("Dump \(sourcePath) Success")
                                 DispatchQueue.main.async {
                                     NotificationCenter.default.post(name: NSNotification.Name("stop"), object: nil)
                                 }
@@ -134,20 +137,20 @@ class Dump {
         }
     }
     
-    static func dump(descriptor: Int32, dupe: UnsafeMutableRawPointer, info: encryption_info_command_64) -> Bool {
+    static func dump(descriptor: Int32, dupe: UnsafeMutableRawPointer, info: encryption_info_command_64) -> (Bool, String) {
         let base = mmap(nil, Int(info.cryptsize), PROT_READ | PROT_EXEC, MAP_PRIVATE, descriptor, off_t(info.cryptoff))
         if base == MAP_FAILED {
-            return false
+            return (false, "mmap fail")
         }
         let error = mremap_encrypted(base!, Int(info.cryptsize), info.cryptid, UInt32(CPU_TYPE_ARM64), UInt32(CPU_SUBTYPE_ARM64_ALL))
         if error != 0 {
             munmap(base, Int(info.cryptsize))
-            return false
+            return (false, "encrypted fail")
         }
         memcpy(dupe+UnsafeMutableRawPointer.Stride(info.cryptoff), base, Int(info.cryptsize))
         munmap(base, Int(info.cryptsize))
         
-        return true
+        return (true, "")
     }
     
     static func mapFile(path: UnsafePointer<CChar>, mutable: Bool, handle: (Int, Int32, UnsafeMutableRawPointer?)->()) {
