@@ -85,9 +85,9 @@ class Dump {
         
         for (i, sourcePath) in needDumpFilePaths.enumerated() {
             let targetPath = dumpedFilePaths[i]
-            Dump.mapFile(path: sourcePath, mutable: false) { base_size, base_descriptor, base_raw in
+            Dump.mapFile(path: sourcePath, mutable: false) { base_size, base_descriptor, base_error, base_raw in
                 if let base = base_raw {
-                    Dump.mapFile(path: targetPath, mutable: true) { dupe_size, dupe_descriptor, dupe_raw in
+                    Dump.mapFile(path: targetPath, mutable: true) { dupe_size, dupe_descriptor, dupe_error, dupe_raw in
                         if let dupe = dupe_raw {
                             if base_size == dupe_size {
                                 let header = UnsafeMutableRawPointer(mutating: dupe).assumingMemoryBound(to: mach_header_64.self)
@@ -127,11 +127,11 @@ class Dump {
                             }
                         } else {
                             munmap(base, base_size)
-                            consoleIO.writeMessage("Read Dupe Fail", to: .error)
+                            consoleIO.writeMessage("Read \(targetPath) Fail with \(dupe_error)", to: .error)
                         }
                     }
                 } else {
-                    consoleIO.writeMessage("Read Base Fail", to: .error)
+                    consoleIO.writeMessage("Read \(sourcePath) Fail with \(base_error)", to: .error)
                 }
             }
         }
@@ -145,7 +145,7 @@ class Dump {
         let error = mremap_encrypted(base!, Int(info.cryptsize), info.cryptid, UInt32(CPU_TYPE_ARM64), UInt32(CPU_SUBTYPE_ARM64_ALL))
         if error != 0 {
             munmap(base, Int(info.cryptsize))
-            return (false, "encrypted fail")
+            return (false, "encrypted fail with \(String(cString: strerror(errno)))")
         }
         memcpy(dupe+UnsafeMutableRawPointer.Stride(info.cryptoff), base, Int(info.cryptsize))
         munmap(base, Int(info.cryptsize))
@@ -153,28 +153,28 @@ class Dump {
         return (true, "")
     }
     
-    static func mapFile(path: UnsafePointer<CChar>, mutable: Bool, handle: (Int, Int32, UnsafeMutableRawPointer?)->()) {
+    static func mapFile(path: UnsafePointer<CChar>, mutable: Bool, handle: (Int, Int32, String, UnsafeMutableRawPointer?)->()) {
         let f = open(path, mutable ? O_RDWR : O_RDONLY)
         if f < 0 {
-            handle(0, 0, nil)
+            handle(0, 0, String(cString: strerror(errno)), nil)
             return
         }
-        
+
         var s = stat()
         if fstat(f, &s) < 0 {
             close(f)
-            handle(0, 0, nil)
+            handle(0, 0, String(cString: strerror(errno)), nil)
             return
         }
-        
-        let base = mmap(nil, Int(s.st_size), mutable ? PROT_READ | PROT_WRITE : PROT_READ, mutable ? MAP_SHARED : MAP_PRIVATE, f, 0)
+
+        let base = mmap(nil, Int(s.st_size), mutable ? (PROT_READ | PROT_WRITE) : PROT_READ, mutable ? MAP_SHARED : MAP_PRIVATE, f, 0)
         if base == MAP_FAILED {
             close(f)
-            handle(0, 0, nil)
+            handle(0, 0, String(cString: strerror(errno)), nil)
             return
         }
-        
-        handle(Int(s.st_size), f, base)
+
+        handle(Int(s.st_size), f, "", base)
     }
     
 }
