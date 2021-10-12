@@ -68,7 +68,7 @@ class Dump {
                     task.launch()
                     let data = pipe.fileHandleForReading.readDataToEndOfFile()
                     if let output = String(data: data, encoding: String.Encoding.utf8) {
-                        if output.contains("LC_VERSION_MIN_IPHONEOS") || output.contains("platform 2") {
+                        if output.contains("platform 2") {
                             consoleIO.writeMessage("This app not support dump on M1 Mac. Because machO PLATFORM is IOS!")
                             do { try fileManager.removeItem(atPath: targetUrl) } catch {}
                             exit(-10)
