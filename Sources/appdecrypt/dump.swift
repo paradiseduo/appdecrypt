@@ -67,9 +67,11 @@ class Dump {
                     task.standardOutput = pipe
                     task.launch()
                     let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                    if let output = String(data: data, encoding: String.Encoding.utf8), output.contains("platform 2") {
-                        consoleIO.writeMessage("This app not support dump on M1 Mac.")
-                        exit(-10)
+                    if let output = String(data: data, encoding: String.Encoding.utf8) {
+                        if output.contains("LC_VERSION_MIN_IPHONEOS") || output.contains("platform 2") {
+                            consoleIO.writeMessage("This app not support dump on M1 Mac. Because machO PLATFORM is IOS!")
+                            exit(-10)
+                        }
                     }
                     needDumpFilePaths.append(sourceUrl+"/"+item+"/"+machOName)
                     dumpedFilePaths.append(targetUrl+"/"+item+"/"+machOName)
