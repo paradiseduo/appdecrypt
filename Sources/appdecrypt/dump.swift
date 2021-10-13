@@ -59,19 +59,21 @@ class Dump {
                         consoleIO.writeMessage("Can't find machO name.", to: .error)
                         return
                     }
-                    let machOFile = sourceUrl+"/"+item+"/"+machOName
-                    let task = Process()
-                    task.launchPath = "/usr/bin/otool"
-                    task.arguments = ["-l", machOFile]
-                    let pipe = Pipe()
-                    task.standardOutput = pipe
-                    task.launch()
-                    let data = pipe.fileHandleForReading.readDataToEndOfFile()
-                    if let output = String(data: data, encoding: String.Encoding.utf8) {
-                        if output.contains("platform 2") {
-                            consoleIO.writeMessage("This app not support dump on M1 Mac. Because machO PLATFORM is IOS!")
-                            do { try fileManager.removeItem(atPath: targetUrl) } catch {}
-                            exit(-10)
+                    if #available(macOS 11.0, *) {
+                        let machOFile = sourceUrl+"/"+item+"/"+machOName
+                        let task = Process()
+                        task.launchPath = "/usr/bin/otool"
+                        task.arguments = ["-l", machOFile]
+                        let pipe = Pipe()
+                        task.standardOutput = pipe
+                        task.launch()
+                        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+                        if let output = String(data: data, encoding: String.Encoding.utf8) {
+                            if output.contains("LC_VERSION_MIN_IPHONEOS") || output.contains("platform 2") {
+                                consoleIO.writeMessage("This app not support dump on M1 Mac. Because machO PLATFORM is IOS!")
+                                do { try fileManager.removeItem(atPath: targetUrl) } catch {}
+                                exit(-10)
+                            }
                         }
                     }
                     needDumpFilePaths.append(sourceUrl+"/"+item+"/"+machOName)
