@@ -55,6 +55,7 @@ BundleMetadata.plist Test.app            iTunesMetadata.plist
 
 First you should connect jailbreak iPhone with USB.
 ```bash
+> brew install ldid
 > git clone https://github.com/paradiseduo/appdecrypt.git
 > cd appdecrypt
 > chmod +x build-iOS.sh
