@@ -13,9 +13,8 @@ This works well and compiles for iOS nicely, if you want use it at iOS devices, 
 > cd appdecrypt
 > chmod +x build-macOS_arm.sh
 > ./build-macOS_arm.sh
-> cd .build/release
 > ./appdecrypt
-Version 2.0
+Version 2.1
 
 appdecrypt is a tool to make decrypt application encrypted binaries on macOS when SIP-enabled.
 
@@ -60,15 +59,12 @@ First you should connect jailbreak iPhone with USB.
 > cd appdecrypt
 > chmod +x build-iOS.sh
 > ./build-iOS.sh
-> scp -P 2222 global.xml root@127.0.0.1:/tmp
-> cd .build/release
 > scp -P 2222 appdecrypt root@127.0.0.1:/tmp
 
 // In iPhone shell
 > cd /tmp
-> ldid -Sglobal.xml appdecrypt 
 > ./appdecrypt
-Version 2.0
+Version 2.1
 
 appdecrypt is a tool to make decrypt application encrypted binaries on macOS when SIP-enabled.
 
@@ -90,23 +86,28 @@ OPTIONS:
 
 #### For Example
 ```bash
-> ./appdecrypt /var/containers/Bundle/Application/23E4B0B4-7275-46CE-8EEA-18CADE61FDB8 /tmp
+// In iPhone shell
+> ./appdecrypt /var/containers/Bundle/Application/5B5D4E97-E760-4AC5-BFEE-F0FF72EBB19E /tmp
 Success to copy file.
-Dump /var/containers/Bundle/Application/23E4B0B4-7275-46CE-8EEA-18CADE61FDB8/Aweme.app/Aweme Success
-Dump /var/containers/Bundle/Application/23E4B0B4-7275-46CE-8EEA-18CADE61FDB8/Aweme.app/PlugIns/AwemeDYShareExtension.appex/AwemeDYShareExtension Success
-Dump /var/containers/Bundle/Application/23E4B0B4-7275-46CE-8EEA-18CADE61FDB8/Aweme.app/PlugIns/AwemeNotificationService.appex/AwemeNotificationService Success
-Dump /var/containers/Bundle/Application/23E4B0B4-7275-46CE-8EEA-18CADE61FDB8/Aweme.app/PlugIns/AwemeWidgetExtension.appex/AwemeWidgetExtension Success
-Dump /var/containers/Bundle/Application/23E4B0B4-7275-46CE-8EEA-18CADE61FDB8/Aweme.app/PlugIns/AWEVideoWidget.appex/AWEVideoWidget Success
-Dump /var/containers/Bundle/Application/23E4B0B4-7275-46CE-8EEA-18CADE61FDB8/Aweme.app/PlugIns/AwemeBroadcastExtension.appex/AwemeBroadcastExtension Success
-Dump /var/containers/Bundle/Application/23E4B0B4-7275-46CE-8EEA-18CADE61FDB8/Aweme.app/PlugIns/AWEFriendsWidgets.appex/AWEFriendsWidgets Success
-Dump /var/containers/Bundle/Application/23E4B0B4-7275-46CE-8EEA-18CADE61FDB8/Aweme.app/PlugIns/AwemeVideoNotification.appex/AwemeVideoNotification Success
-Dump /var/containers/Bundle/Application/23E4B0B4-7275-46CE-8EEA-18CADE61FDB8/Aweme.app/Frameworks/ByteRtcEngineKit.framework/ByteRtcEngineKit Success
-Dump /var/containers/Bundle/Application/23E4B0B4-7275-46CE-8EEA-18CADE61FDB8/Aweme.app/Frameworks/byteaudio.framework/byteaudio Success
-> ls
-Payload/
+Dump /var/containers/Bundle/Application/5B5D4E97-E760-4AC5-BFEE-F0FF72EBB19E/KingsRaid.app/KingsRaid Success
+Dump /var/containers/Bundle/Application/5B5D4E97-E760-4AC5-BFEE-F0FF72EBB19E/KingsRaid.app/Frameworks/FBSDKGamingServicesKit.framework/FBSDKGamingServicesKit Success
+Dump /var/containers/Bundle/Application/5B5D4E97-E760-4AC5-BFEE-F0FF72EBB19E/KingsRaid.app/Frameworks/FBLPromises.framework/FBLPromises Success
+Dump /var/containers/Bundle/Application/5B5D4E97-E760-4AC5-BFEE-F0FF72EBB19E/KingsRaid.app/Frameworks/FBSDKShareKit.framework/FBSDKShareKit Success
+Dump /var/containers/Bundle/Application/5B5D4E97-E760-4AC5-BFEE-F0FF72EBB19E/KingsRaid.app/Frameworks/GoogleUtilities.framework/GoogleUtilities Success
+Dump /var/containers/Bundle/Application/5B5D4E97-E760-4AC5-BFEE-F0FF72EBB19E/KingsRaid.app/Frameworks/FBSDKLoginKit.framework/FBSDKLoginKit Success
+Dump /var/containers/Bundle/Application/5B5D4E97-E760-4AC5-BFEE-F0FF72EBB19E/KingsRaid.app/Frameworks/nanopb.framework/nanopb Success
+Dump /var/containers/Bundle/Application/5B5D4E97-E760-4AC5-BFEE-F0FF72EBB19E/KingsRaid.app/Frameworks/FBSDKCoreKit.framework/FBSDKCoreKit Success
+Dump /var/containers/Bundle/Application/5B5D4E97-E760-4AC5-BFEE-F0FF72EBB19E/KingsRaid.app/Frameworks/Protobuf.framework/Protobuf Success
 > cd Payload
 > ls
-Aweme.app/  BundleMetadata.plist  iTunesMetadata.plist
+BundleMetadata.plist  KingsRaid.app/  iTunesMetadata.plist
+> tar -cvf /tmp/dump.tar ./
+
+
+// In mac shell
+> cd ~/Desktop
+> scp -P 2222 root@127.0.0.1:/tmp/dump.tar .
+dump.tar
 ```
 
 ## Principle

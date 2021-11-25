@@ -29,3 +29,6 @@ function main() {
 }
 
 main
+
+mv .build/release/appdecrypt .
+chmod +x appdecrypt
