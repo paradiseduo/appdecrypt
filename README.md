@@ -121,6 +121,9 @@ but now works on macOS:
 https://github.com/meme/apple-tools/tree/master/foulplay
 
 
+## LICENSE
+
+This software is released under the GPL-3.0 license.
 
 ## Stargazers over time
 
