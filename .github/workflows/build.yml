@@ -1,0 +1,33 @@
+name: MacOS Workflow
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [macos-latest]
+        scripts: ['build-macOS_arm.sh', 'build-macOS_x86.sh']
+
+    steps:
+    - name: Check out source code
+      uses: actions/checkout@v2
+
+    - name: Set up permissions
+      run: chmod +x ${{ matrix.scripts }}
+
+    - name: Build
+      run: ./${{ matrix.scripts }}
+
+    - name: Upload binary as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: appdecrypt
+        path: appdecrypt
