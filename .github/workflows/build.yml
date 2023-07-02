@@ -14,20 +14,20 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest]
-        scripts: ['build-macOS_arm.sh', 'build-macOS_x86.sh']
+        arch: ['arm', 'x86']
 
     steps:
     - name: Check out source code
       uses: actions/checkout@v2
 
     - name: Set up permissions
-      run: chmod +x ${{ matrix.scripts }}
+      run: chmod +x build-macOS_${{ matrix.arch }}.sh 
 
     - name: Build
-      run: ./${{ matrix.scripts }}
+      run: ./build-macOS_${{ matrix.arch }}.sh 
 
     - name: Upload binary as artifact
       uses: actions/upload-artifact@v2
       with:
-        name: appdecrypt
+        name: appdecrypt-macOS-${{ matrix.arch }}
         path: appdecrypt
