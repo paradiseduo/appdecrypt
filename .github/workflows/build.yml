@@ -7,13 +7,12 @@ on:
   pull_request:
 
 jobs:
-  build:
+  build_macOS:
 
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
     
     strategy:
       matrix:
-        os: [macos-latest]
         arch: ['arm', 'x86']
 
     steps:
@@ -30,4 +29,23 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: appdecrypt-macOS-${{ matrix.arch }}
+        path: appdecrypt
+        
+  build_iOS:
+    runs-on: macos-latest
+
+    steps:
+    - name: Check out source code
+      uses: actions/checkout@v2
+
+    - name: Set up permissions
+      run: chmod +x build-iOS.sh 
+
+    - name: Build
+      run: ./build-iOS.sh
+
+    - name: Upload binary as artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: appdecrypt-iOS
         path: appdecrypt
