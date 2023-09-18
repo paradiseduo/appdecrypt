@@ -125,7 +125,8 @@ https://github.com/meme/apple-tools/tree/master/foulplay
 
 This software is released under the GPL-3.0 license.
 
+
 ## Stargazers over time
 
-[![Stargazers over time](https://starchart.cc/paradiseduo/appdecrypt.svg)](https://starchart.cc/paradiseduo/appdecrypt)
+[![Stargazers over time](https://starchart.cc/paradiseduo/inject.svg)](https://starchart.cc/paradiseduo/inject)
 
