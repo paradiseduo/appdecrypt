@@ -155,7 +155,14 @@ class Dump {
     }
     
     static func dump(descriptor: Int32, dupe: UnsafeMutableRawPointer, info: encryption_info_command_64) -> (Bool, String) {
-        let base = mmap(nil, Int(info.cryptsize), PROT_READ | PROT_EXEC, MAP_PRIVATE, descriptor, off_t(info.cryptoff))
+        // https://github.com/Qcloud1223/COMP461905/issues/2#issuecomment-987510518
+        // Align the offset based on the page size
+        // See: https://man7.org/linux/man-pages/man2/mmap.2.html
+        let pageSize = Float(sysconf(_SC_PAGESIZE))
+        let multiplier = ceil(Float(info.cryptoff) / pageSize)
+        let alignedOffset = off_t(multiplier * pageSize)
+
+        let base = mmap(nil, size_t(info.cryptsize), PROT_EXEC | PROT_READ, MAP_PRIVATE, descriptor, alignedOffset)
         if base == MAP_FAILED {
             return (false, "mmap fail with \(String(cString: strerror(errno)))")
         }
