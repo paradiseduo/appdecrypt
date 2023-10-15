@@ -165,23 +165,33 @@ class Dump {
         // See: https://man7.org/linux/man-pages/man2/mmap.2.html
         let pageSize = Float(sysconf(_SC_PAGESIZE))
         let multiplier = ceil(Float(info.cryptoff) / pageSize)
-        let alignedOffset = off_t(multiplier * pageSize)
+        let alignedOffset = Int(multiplier * pageSize)
+
+        let cryptsize = Int(info.cryptsize)
+        let cryptoff = Int(info.cryptoff)
 
         let cryptid = Int(info.cryptid)
         // cryptid 0 doesn't need PROT_EXEC
         let prot = PROT_READ | (cryptid == 0 ? 0 : PROT_EXEC)
-        let base = mmap(nil, size_t(info.cryptsize), prot, MAP_PRIVATE, descriptor, alignedOffset)
+        var base = mmap(nil, cryptsize, prot, MAP_PRIVATE, descriptor, off_t(alignedOffset))
         if base == MAP_FAILED {
             return (false, "mmap fail with \(String(cString: strerror(errno)))")
         }
-        let error = mremap_encrypted(base!, Int(info.cryptsize), info.cryptid, UInt32(CPU_TYPE_ARM64), UInt32(CPU_SUBTYPE_ARM64_ALL))
+        let error = mremap_encrypted(base!, cryptsize, info.cryptid, UInt32(CPU_TYPE_ARM64), UInt32(CPU_SUBTYPE_ARM64_ALL))
         if error != 0 {
-            munmap(base, Int(info.cryptsize))
+            munmap(base, cryptsize)
             return (false, "encrypted fail with \(String(cString: strerror(errno)))")
         }
-        memcpy(dupe+UnsafeMutableRawPointer.Stride(info.cryptoff), base, Int(info.cryptsize))
-        munmap(base, Int(info.cryptsize))
-        
+
+        // alignment needs to be adjusted, memmove will have bus error if not aligned
+        if alignedOffset - cryptoff > cryptsize  {
+            posix_memalign(&base, cryptsize, cryptsize)
+            memmove(dupe+UnsafeMutableRawPointer.Stride(info.cryptoff), base, cryptsize)
+            free(base)
+        } else {
+            memmove(dupe+UnsafeMutableRawPointer.Stride(info.cryptoff), base, cryptsize)
+            munmap(base, cryptsize)
+        }
         return (true, "")
     }
     
