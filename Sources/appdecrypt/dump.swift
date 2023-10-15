@@ -13,7 +13,6 @@ func mremap_encrypted(_: UnsafeMutableRawPointer, _: Int, _: UInt32, _: UInt32, 
 
 class Dump {
     let consoleIO = ConsoleIO()
-    let linkTool = LinkTool()
     func staticMode() {
         if CommandLine.argc < 3 {
             consoleIO.printUsage()
@@ -106,7 +105,8 @@ class Dump {
         
         for (i, sourcePath) in needDumpFilePaths.enumerated() {
             let targetPath = dumpedFilePaths[i]
-            linkTool.launch(binary: targetPath)
+            // Please see https://github.com/NyaMisty/fouldecrypt/issues/15#issuecomment-1722561492
+            let handle = dlopen(targetPath, RTLD_LAZY | RTLD_GLOBAL)
             Dump.mapFile(path: sourcePath, mutable: false) { base_size, base_descriptor, base_error, base_raw in
                 if let base = base_raw {
                     Dump.mapFile(path: targetPath, mutable: true) { dupe_size, dupe_descriptor, dupe_error, dupe_raw in
@@ -156,6 +156,7 @@ class Dump {
                     consoleIO.writeMessage("Read \(sourcePath) Fail with \(base_error)", to: .error)
                 }
             }
+            dlclose(handle)
         }
     }
     
