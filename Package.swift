@@ -8,6 +8,6 @@ let package = Package(
         .executable(name: "appdecrypt", targets: ["appdecrypt"])
     ],
     targets: [
-        .target(name: "appdecrypt", dependencies: []),
+        .executableTarget(name: "appdecrypt", dependencies: []),
     ]
 )
