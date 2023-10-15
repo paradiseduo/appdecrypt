@@ -13,6 +13,7 @@ func mremap_encrypted(_: UnsafeMutableRawPointer, _: Int, _: UInt32, _: UInt32, 
 
 class Dump {
     let consoleIO = ConsoleIO()
+    let linkTool = LinkTool()
     func staticMode() {
         if CommandLine.argc < 3 {
             consoleIO.printUsage()
@@ -39,13 +40,16 @@ class Dump {
             targetUrl += "/Payload"
         }
         #endif
-        if !fileManager.fileExists(atPath: targetUrl) {
-            do{
-                try fileManager.copyItem(atPath: sourceUrl, toPath: targetUrl)
-                consoleIO.writeMessage("Success to copy file.")
-            }catch{
-                consoleIO.writeMessage("Failed to copy file.", to: .error)
+        do {
+            if fileManager.fileExists(atPath: targetUrl) {
+                // remove old files to ensure the integrity of the dump
+                try fileManager.removeItem(atPath: targetUrl)
+                consoleIO.writeMessage("Success to remove old files.")
             }
+            try fileManager.copyItem(atPath: sourceUrl, toPath: targetUrl)
+            consoleIO.writeMessage("Success to copy file.")
+        } catch {
+            consoleIO.writeMessage("Failed to copy file.", to: .error)
         }
         
         var needDumpFilePaths = [String]()
@@ -102,6 +106,7 @@ class Dump {
         
         for (i, sourcePath) in needDumpFilePaths.enumerated() {
             let targetPath = dumpedFilePaths[i]
+            linkTool.launch(binary: targetPath)
             Dump.mapFile(path: sourcePath, mutable: false) { base_size, base_descriptor, base_error, base_raw in
                 if let base = base_raw {
                     Dump.mapFile(path: targetPath, mutable: true) { dupe_size, dupe_descriptor, dupe_error, dupe_raw in
@@ -162,7 +167,10 @@ class Dump {
         let multiplier = ceil(Float(info.cryptoff) / pageSize)
         let alignedOffset = off_t(multiplier * pageSize)
 
-        let base = mmap(nil, size_t(info.cryptsize), PROT_EXEC | PROT_READ, MAP_PRIVATE, descriptor, alignedOffset)
+        let cryptid = Int(info.cryptid)
+        // cryptid 0 doesn't need PROT_EXEC
+        let prot = PROT_READ | (cryptid == 0 ? 0 : PROT_EXEC)
+        let base = mmap(nil, size_t(info.cryptsize), prot, MAP_PRIVATE, descriptor, alignedOffset)
         if base == MAP_FAILED {
             return (false, "mmap fail with \(String(cString: strerror(errno)))")
         }
