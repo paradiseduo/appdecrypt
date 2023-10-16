@@ -1,13 +1,16 @@
-// swift-tools-version:5.6
+// swift-tools-version:5.3
 
 import PackageDescription
 
 let package = Package(
     name: "appdecrypt",
     products: [
-        .executable(name: "appdecrypt", targets: ["appdecrypt"])
+        .executable(
+            name: "appdecrypt",
+            targets: ["appdecrypt"]
+        )
     ],
     targets: [
-        .executableTarget(name: "appdecrypt", dependencies: []),
+        .target(name: "appdecrypt")
     ]
 )
