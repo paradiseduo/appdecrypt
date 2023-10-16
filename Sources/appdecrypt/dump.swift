@@ -39,13 +39,16 @@ class Dump {
             targetUrl += "/Payload"
         }
         #endif
-        if !fileManager.fileExists(atPath: targetUrl) {
-            do{
-                try fileManager.copyItem(atPath: sourceUrl, toPath: targetUrl)
-                consoleIO.writeMessage("Success to copy file.")
-            }catch{
-                consoleIO.writeMessage("Failed to copy file.", to: .error)
+        do {
+            if fileManager.fileExists(atPath: targetUrl) {
+                // remove old files to ensure the integrity of the dump
+                try fileManager.removeItem(atPath: targetUrl)
+                consoleIO.writeMessage("Success to remove old files.")
             }
+            try fileManager.copyItem(atPath: sourceUrl, toPath: targetUrl)
+            consoleIO.writeMessage("Success to copy file.")
+        } catch {
+            consoleIO.writeMessage("Failed to copy file.", to: .error)
         }
         
         var needDumpFilePaths = [String]()
@@ -102,6 +105,8 @@ class Dump {
         
         for (i, sourcePath) in needDumpFilePaths.enumerated() {
             let targetPath = dumpedFilePaths[i]
+            // Please see https://github.com/NyaMisty/fouldecrypt/issues/15#issuecomment-1722561492
+            let handle = dlopen(targetPath, RTLD_LAZY | RTLD_GLOBAL)
             Dump.mapFile(path: sourcePath, mutable: false) { base_size, base_descriptor, base_error, base_raw in
                 if let base = base_raw {
                     Dump.mapFile(path: targetPath, mutable: true) { dupe_size, dupe_descriptor, dupe_error, dupe_raw in
@@ -151,22 +156,43 @@ class Dump {
                     consoleIO.writeMessage("Read \(sourcePath) Fail with \(base_error)", to: .error)
                 }
             }
+            dlclose(handle)
         }
     }
     
     static func dump(descriptor: Int32, dupe: UnsafeMutableRawPointer, info: encryption_info_command_64) -> (Bool, String) {
-        let base = mmap(nil, Int(info.cryptsize), PROT_READ | PROT_EXEC, MAP_PRIVATE, descriptor, off_t(info.cryptoff))
+        // https://github.com/Qcloud1223/COMP461905/issues/2#issuecomment-987510518
+        // Align the offset based on the page size
+        // See: https://man7.org/linux/man-pages/man2/mmap.2.html
+        let pageSize = Float(sysconf(_SC_PAGESIZE))
+        let multiplier = ceil(Float(info.cryptoff) / pageSize)
+        let alignedOffset = Int(multiplier * pageSize)
+
+        let cryptsize = Int(info.cryptsize)
+        let cryptoff = Int(info.cryptoff)
+
+        let cryptid = Int(info.cryptid)
+        // cryptid 0 doesn't need PROT_EXEC
+        let prot = PROT_READ | (cryptid == 0 ? 0 : PROT_EXEC)
+        var base = mmap(nil, cryptsize, prot, MAP_PRIVATE, descriptor, off_t(alignedOffset))
         if base == MAP_FAILED {
             return (false, "mmap fail with \(String(cString: strerror(errno)))")
         }
-        let error = mremap_encrypted(base!, Int(info.cryptsize), info.cryptid, UInt32(CPU_TYPE_ARM64), UInt32(CPU_SUBTYPE_ARM64_ALL))
+        let error = mremap_encrypted(base!, cryptsize, info.cryptid, UInt32(CPU_TYPE_ARM64), UInt32(CPU_SUBTYPE_ARM64_ALL))
         if error != 0 {
-            munmap(base, Int(info.cryptsize))
+            munmap(base, cryptsize)
             return (false, "encrypted fail with \(String(cString: strerror(errno)))")
         }
-        memcpy(dupe+UnsafeMutableRawPointer.Stride(info.cryptoff), base, Int(info.cryptsize))
-        munmap(base, Int(info.cryptsize))
-        
+
+        // alignment needs to be adjusted, memmove will have bus error if not aligned
+        if alignedOffset - cryptoff > cryptsize  {
+            posix_memalign(&base, cryptsize, cryptsize)
+            memmove(dupe+UnsafeMutableRawPointer.Stride(info.cryptoff), base, cryptsize)
+            free(base)
+        } else {
+            memmove(dupe+UnsafeMutableRawPointer.Stride(info.cryptoff), base, cryptsize)
+            munmap(base, cryptsize)
+        }
         return (true, "")
     }
     
