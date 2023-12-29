@@ -46,6 +46,7 @@ class ConsoleIO {
         
         OPTIONS:
           -h, --help              Show help information.
+          --ignore-ios-check      Decrypt the app anyway, even if M1 can't run it.
         """)
         DispatchQueue.main.async {
             NotificationCenter.default.post(name: NSNotification.Name("stop"), object: nil)
