@@ -1,6 +1,5 @@
 # appdecrypt
-
-Decrypt application encrypted binaries on macOS when SIP-enabled (macOS 11.2.3 or below).
+Decrypt application's encrypted binaries on macOS when SIP-enabled (macOS 11.2.3 or below). *Even if it can decrypt all applications, some iOS apps won't be possible to run on the mac, even after decryption.*
 
 This works well and compiles for iOS nicely, if you want use it at iOS devices, you can use build-ios.sh (Thanks @dlevi309).
 
