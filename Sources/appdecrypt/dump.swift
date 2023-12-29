@@ -78,7 +78,7 @@ class Dump {
                     if let output = String(data: data, encoding: String.Encoding.utf8) {
                         if output.contains("LC_VERSION_MIN_IPHONEOS") || output.contains("platform 2") {
                             if !ignoreIOSOnlyCheck {
-                                consoleIO.writeMessage("This app not support dump on M1 Mac. Because machO PLATFORM is IOS ! Ignore this by adding argument --ignore-ios-check")
+                                consoleIO.writeMessage("This app can't run on Mac M1 ! However, you can decrypt it anyway by adding argument --ignore-ios-check")
                                 do { try fileManager.removeItem(atPath: targetUrl) } catch {}
                                 exit(-10)
                             } else {
