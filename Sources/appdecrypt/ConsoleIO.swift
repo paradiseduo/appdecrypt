@@ -34,7 +34,7 @@ class ConsoleIO {
         
         Examples:
             mac:
-                appdecrypt /Applicaiton/Test.app /Users/admin/Desktop/Test.app
+                appdecrypt /Application/Test.app /Users/admin/Desktop/Test.app
             iPhone:
                 appdecrypt /var/containers/Bundle/Application/XXXXXX /tmp
         
@@ -46,6 +46,7 @@ class ConsoleIO {
         
         OPTIONS:
           -h, --help              Show help information.
+          --ignore-ios-check      Decrypt the app even if M1 can't run it.
         """)
         DispatchQueue.main.async {
             NotificationCenter.default.post(name: NSNotification.Name("stop"), object: nil)
