@@ -114,7 +114,7 @@ class Dump {
         for (i, sourcePath) in needDumpFilePaths.enumerated() {
             let targetPath = dumpedFilePaths[i]
             // Please see https://github.com/NyaMisty/fouldecrypt/issues/15#issuecomment-1722561492
-            let handle = dlopen(targetPath, RTLD_LAZY | RTLD_GLOBAL)
+            let handle = dlopen(sourcePath, RTLD_LAZY | RTLD_GLOBAL)
             Dump.mapFile(path: sourcePath, mutable: false) { base_size, base_descriptor, base_error, base_raw in
                 if let base = base_raw {
                     Dump.mapFile(path: targetPath, mutable: true) { dupe_size, dupe_descriptor, dupe_error, dupe_raw in
