@@ -4,14 +4,14 @@
 <dict>
 	<key>com.apple.developer.team-identifier</key>
 	<string>-</string>
-    <key>platform-application</key>
+    	<key>platform-application</key>
 	<true/>
 	<key>com.apple.private.security.no-container</key>
 	<true/>
 	<key>com.apple.private.skip-library-validation</key>
 	<true/>
 	<key>application-identifier</key>
-    <string>com.paradiseduo.appdecrypt</string>
+   	<string>com.paradiseduo.appdecrypt</string>
 	<key>com.apple.CommCenter.fine-grained</key>
 	<array>
 		<string>data-allowed-write</string>
