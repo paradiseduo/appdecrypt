@@ -44,15 +44,16 @@ class Dump {
         }
         #endif
         do {
+            consoleIO.writeMessage("Copy From \(sourceUrl) to \(targetUrl)")
             if fileManager.fileExists(atPath: targetUrl) {
                 // remove old files to ensure the integrity of the dump
                 try fileManager.removeItem(atPath: targetUrl)
-                consoleIO.writeMessage("Success to remove old files.")
+                consoleIO.writeMessage("Success to remove \(targetUrl)")
             }
             try fileManager.copyItem(atPath: sourceUrl, toPath: targetUrl)
             consoleIO.writeMessage("Success to copy file.")
-        } catch {
-            consoleIO.writeMessage("Failed to copy file.", to: .error)
+        } catch let e {
+            consoleIO.writeMessage("Failed With \(e)", to: .error)
         }
         
         var needDumpFilePaths = [String]()
