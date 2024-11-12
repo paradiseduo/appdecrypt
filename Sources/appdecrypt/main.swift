@@ -8,7 +8,7 @@
 import Foundation
 import MachO
 
-let version = "2.3"
+let version = "2.4"
 
 var running = true
 
