@@ -45,10 +45,15 @@ class Dump {
         #endif
         do {
             consoleIO.writeMessage("Copy From \(sourceUrl) to \(targetUrl)")
-            if fileManager.fileExists(atPath: targetUrl) {
+            var isDirectory: ObjCBool = false
+            if fileManager.fileExists(atPath: targetUrl, isDirectory: &isDirectory) {
                 // remove old files to ensure the integrity of the dump
-                try fileManager.removeItem(atPath: targetUrl)
-                consoleIO.writeMessage("Success to remove \(targetUrl)")
+                if isDirectory.boolValue && !targetUrl.hasSuffix(".app") {
+                    consoleIO.writeMessage("\(targetUrl) is a Directory")
+                } else {
+                    try fileManager.removeItem(atPath: targetUrl)
+                    consoleIO.writeMessage("Success to remove \(targetUrl)")
+                }
             }
             try fileManager.copyItem(atPath: sourceUrl, toPath: targetUrl)
             consoleIO.writeMessage("Success to copy file.")
