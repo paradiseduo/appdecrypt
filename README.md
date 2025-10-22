@@ -3,6 +3,10 @@ Decrypt application's encrypted binaries on macOS when SIP-enabled (macOS 11.2.3
 
 This works well and compiles for iOS nicely, if you want use it at iOS devices, you can use build-ios.sh (Thanks @dlevi309).
 
+This project support macOS 15.0-15.2  https://github.com/34306/decrypted , using CVE-2025-24204, https://github.com/FFRI/CVE-2025-24204/tree/main
+
+CVE-2025-24204 is a vulnerability that allows reading any process memory on SIP-enabled macOS systems. The root cause of this vulnerability stems from adding an excessively powerful entitlement (com.apple.system-task-ports.read) to the gcore binary. 
+
 ## How to use
 
 ### On mac with M1 CPU
